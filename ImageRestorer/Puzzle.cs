@@ -26,24 +26,22 @@ namespace ImageRestorer
         private Bitmap bitmap;
         public PuzzleTile[,] tiles;
         //public int[,] positions;
-        /*public Puzzle(int width, int height, int tileSize)
+        public Puzzle(int width, int height, int tileSize)
         {
             this.width = width;
             this.height = height;
             this.tileSize = tileSize;
+            bitmap = new Bitmap(width * tileSize, height * tileSize);
             tiles = new PuzzleTile[width, height];
-            //positions = new int[width, height];
-            int index = 0;
 
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
-                    //positions[x, y] = index++;
-                    //tiles[x,y]
+                    tiles[x, y] = new PuzzleTile(new Bitmap(tileSize, tileSize), 0);
                 }
             }
-        }*/
+        }//*/
         public Puzzle(string fileName, int tileSize)
         {
             this.tileSize = tileSize;

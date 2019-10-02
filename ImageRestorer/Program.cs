@@ -13,15 +13,22 @@ namespace ImageRestorer
         static void Main(string[] args)
         {
             //*
-            Puzzle puzzl2e = new Puzzle("0000.png", 8);
-            Solver.NaiveSolve(puzzl2e);
+            Puzzle puzzl2e = new Puzzle("2458.png", 64);
+            //puzzl2e.Swap(3, 4, 0, 0);
+            //Console.WriteLine(puzzl2e.tiles[0, 0].index);
+            //Solver.NaiveSolve(puzzl2e);
+            Solver.Solve(puzzl2e);
             puzzl2e.Save("result.png");
-            //StreamWriter sw = new StreamWriter("output.txt");
-            //sw.WriteLine(puzzl2e.GetPermutation());
-            //sw.Close();
             return;//*/
             /*
-            Puzzle puzzl2e = new Puzzle("1200.png", 64);
+            Puzzle puzzl3e = new Puzzle("0600.png", 32);
+            StreamWriter sw2 = new StreamWriter("output.txt");
+            Solver.Solve(puzzl3e);
+            sw2.WriteLine(puzzl3e.GetPermutation());
+            sw2.Close();
+            return;//*/
+            /*
+            Puzzle puzzl2e = new Puzzle("0600.png", 32);
             StreamReader reader = new StreamReader("input.txt");
             //reader.ReadLine();
             string[] raw = reader.ReadLine().Split(' ');
@@ -40,7 +47,7 @@ namespace ImageRestorer
                             pos = i + j * puzzl2e.width;
                         }
                     }
-                puzzl2e.Swap(index % 8, index / 8, pos % 8, pos / 8);
+                puzzl2e.Swap(index % 16, index / 16, pos % 16, pos / 16);
                 puzzl2e.Save(String.Format("results2/{0}.png", index));
                 index++;
             }
@@ -50,7 +57,7 @@ namespace ImageRestorer
             sw.Close();
             return;//*/
 
-            StreamWriter writer = new StreamWriter("result4.txt");
+            StreamWriter writer = new StreamWriter("resultA2.txt");
 
             foreach (string file in Directory.GetFiles("D:\\tasks\\shuffled-images-data\\data_test1_blank\\64"))
             {
@@ -58,7 +65,7 @@ namespace ImageRestorer
                 Console.WriteLine(file);
                 writer.WriteLine(Path.GetFileName(file));
                 Puzzle puzzle = new Puzzle(file, 64);
-                Solver.NaiveSolve(puzzle);
+                Solver.Solve(puzzle);
                 writer.WriteLine(puzzle.GetPermutation());
             }
             writer.Close();
