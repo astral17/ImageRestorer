@@ -68,10 +68,6 @@ namespace ImageRestorer
             PuzzleTile tile = tiles[x1, y1];
             tiles[x1, y1] = tiles[x2, y2];
             tiles[x2, y2] = tile;
-
-            /*int position = positions[x1, y1];
-            positions[x1, y1] = positions[x2, y2];
-            positions[x2, y2] = position;*/
         }
         public void Save(string fileName)
         {
