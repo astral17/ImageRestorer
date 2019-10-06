@@ -37,13 +37,6 @@ namespace ImageRestorer
                 other.y = tmp;
             }
         }
-        private static Int64 GetColorDistance(Color color1, Color color2)
-        {
-            //return (Int64)(Math.Pow(Math.Abs(color1.R - color2.R), 2.0) + Math.Pow(Math.Abs(color1.G - color2.G), 2.0) + Math.Pow(Math.Abs(color1.B - color2.B), 2.0));
-            //return Math.Abs(color1.R - color2.R) + Math.Abs(color1.G - color2.G) + Math.Abs(color1.B - color2.B);
-            return Math.Abs(color1.R - color2.R) + Math.Abs(color1.G - color2.G) + Math.Abs(color1.B - color2.B) + random.Next(0, 10);
-            //return Math.Abs(color1.R + color1.G + color1.B - color2.R - color2.G - color2.B);
-        }
         public static void NaiveSolve(Puzzle puzzle)
         {
             List<TilePointer> tiles = new List<TilePointer>();
@@ -77,12 +70,12 @@ namespace ImageRestorer
                             if (x == 0)
                             {
                                 for (int i = 0; i < puzzle.tileSize; i++)
-                                    score += GetColorDistance(puzzle.tiles[x, y - 1].bitmap.GetPixel(i, puzzle.tileSize - 1), tile.tile.bitmap.GetPixel(i, 0));
+                                    score += Utils.GetColorDistance(puzzle.tiles[x, y - 1].bitmap.GetPixel(i, puzzle.tileSize - 1), tile.tile.bitmap.GetPixel(i, 0));
                             }
                             else
                             {
                                 for (int i = 0; i < puzzle.tileSize; i++)
-                                    score += GetColorDistance(puzzle.tiles[x - 1, y].bitmap.GetPixel(puzzle.tileSize - 1, i), tile.tile.bitmap.GetPixel(0, i));
+                                    score += Utils.GetColorDistance(puzzle.tiles[x - 1, y].bitmap.GetPixel(puzzle.tileSize - 1, i), tile.tile.bitmap.GetPixel(0, i));
                             }
 
                             if (score < bestScore)
@@ -127,50 +120,50 @@ namespace ImageRestorer
             {
                 case ConnectDirection.Right:
                     for (int i = 0; i < size; i++)
-                        score += GetColorDistance(tile1.GetPixel(size - 1, i), tile2.GetPixel(0, i));
+                        score += Utils.GetColorDistance(tile1.GetPixel(size - 1, i), tile2.GetPixel(0, i));
                     break;
                 case ConnectDirection.Left:
                     for (int i = 0; i < size; i++)
-                        score += GetColorDistance(tile1.GetPixel(0, i), tile2.GetPixel(size - 1, i));
+                        score += Utils.GetColorDistance(tile1.GetPixel(0, i), tile2.GetPixel(size - 1, i));
                     break;
                 case ConnectDirection.Bottom:
                     for (int i = 0; i < size; i++)
-                        score += GetColorDistance(tile1.GetPixel(i, size - 1), tile2.GetPixel(i, 0));
+                        score += Utils.GetColorDistance(tile1.GetPixel(i, size - 1), tile2.GetPixel(i, 0));
                     break;
                 case ConnectDirection.Top:
                     for (int i = 0; i < size; i++)
-                        score += GetColorDistance(tile1.GetPixel(i, 0), tile2.GetPixel(i, size - 1));
+                        score += Utils.GetColorDistance(tile1.GetPixel(i, 0), tile2.GetPixel(i, size - 1));
                     break;
             }
             return score;
         }
-        private static readonly Random random = new Random();
         private class TwoTilesEdge : IComparable
         {
             public ConnectDirection direction;
             public AdvancedTile tile1, tile2;
             public Int64 score;
-            public int id = random.Next();
-            public TwoTilesEdge(ConnectDirection direction, AdvancedTile tile1, AdvancedTile tile2)
+            public int id ;
+            public TwoTilesEdge(ConnectDirection direction, AdvancedTile tile1, AdvancedTile tile2, int index)
             {
+                id = index;
                 score = 0;
                 switch (direction)
                 {
                     case ConnectDirection.Right:
                         for (int i = 0; i < tile1.size; i++)
-                            score += GetColorDistance(tile1.bitmap.GetPixel(tile1.size - 1, i), tile2.bitmap.GetPixel(0, i));
+                            score += Utils.GetColorDistance(tile1.bitmap.GetPixel(tile1.size - 1, i), tile2.bitmap.GetPixel(0, i));
                         break;
                     case ConnectDirection.Left:
                         for (int i = 0; i < tile1.size; i++)
-                            score += GetColorDistance(tile1.bitmap.GetPixel(0, i), tile2.bitmap.GetPixel(tile1.size - 1, i));
+                            score += Utils.GetColorDistance(tile1.bitmap.GetPixel(0, i), tile2.bitmap.GetPixel(tile1.size - 1, i));
                         break;
                     case ConnectDirection.Bottom:
                         for (int i = 0; i < tile1.size; i++)
-                            score += GetColorDistance(tile1.bitmap.GetPixel(i, tile1.size - 1), tile2.bitmap.GetPixel(i, 0));
+                            score += Utils.GetColorDistance(tile1.bitmap.GetPixel(i, tile1.size - 1), tile2.bitmap.GetPixel(i, 0));
                         break;
                     case ConnectDirection.Top:
                         for (int i = 0; i < tile1.size; i++)
-                            score += GetColorDistance(tile1.bitmap.GetPixel(i, 0), tile2.bitmap.GetPixel(i, tile1.size - 1));
+                            score += Utils.GetColorDistance(tile1.bitmap.GetPixel(i, 0), tile2.bitmap.GetPixel(i, tile1.size - 1));
                         break;
                 }
 
@@ -204,7 +197,7 @@ namespace ImageRestorer
 
             }
         }
-        private static void AddEdges(SortedSet<TwoTilesEdge> edges, List<AdvancedTile> tiles, AdvancedTile addTile)
+        private static void AddEdges(SortedSet<TwoTilesEdge> edges, List<AdvancedTile> tiles, AdvancedTile addTile, ref int index)
         {
             //if (addTile.state != TileState.Open)
             if (addTile.selected)
@@ -218,10 +211,10 @@ namespace ImageRestorer
                 //if (tile.state == TileState.Open)
                 if (!tile.selected)
                 {
-                    edges.Add(new TwoTilesEdge(ConnectDirection.Bottom, addTile, tile));
-                    edges.Add(new TwoTilesEdge(ConnectDirection.Top, addTile, tile));
-                    edges.Add(new TwoTilesEdge(ConnectDirection.Left, addTile, tile));
-                    edges.Add(new TwoTilesEdge(ConnectDirection.Right, addTile, tile));
+                    edges.Add(new TwoTilesEdge(ConnectDirection.Bottom, addTile, tile, ++index));
+                    edges.Add(new TwoTilesEdge(ConnectDirection.Top, addTile, tile, ++index));
+                    edges.Add(new TwoTilesEdge(ConnectDirection.Left, addTile, tile, ++index));
+                    edges.Add(new TwoTilesEdge(ConnectDirection.Right, addTile, tile, ++index));
                 }
             }
         }
@@ -283,7 +276,8 @@ namespace ImageRestorer
             SortedSet<TwoTilesEdge> edges = new SortedSet<TwoTilesEdge>();
             int minX = 0, minY = 0, maxX = 0, maxY = 0;
             tiles[0].x = tiles[0].y = 0;
-            AddEdges(edges, tiles, tiles[0]);
+            int uindex = 0;
+            AddEdges(edges, tiles, tiles[0], ref uindex);
             //Directory.CreateDirectory("results3");
             //int iteration = 0;
             HashSet<Point> used = new HashSet<Point>();
@@ -332,7 +326,7 @@ namespace ImageRestorer
                 best.tile2.free--;
                 if (best.tile1.free == 0)
                     best.tile1.state = TileState.Closed;*/
-                AddEdges(edges, tiles, best.tile2);
+                AddEdges(edges, tiles, best.tile2, ref uindex);
                 /*/ DEBUG ONLY
                 Puzzle debugPuzzle = new Puzzle(puzzle.width, puzzle.height, puzzle.tileSize);
                 foreach (AdvancedTile tile in tiles)
@@ -342,7 +336,13 @@ namespace ImageRestorer
                 }
                 debugPuzzle.Save(String.Format("results3/{0}.png", ++iteration));//*/
             }
-
+            /*
+            if (used.Count < puzzle.tileSize * puzzle.tileSize)
+            {
+                for (int y = 0; y < puzzle.height; y++)
+                    for (int x = 0; x < puzzle.width; x++)
+                        puzzle.tiles[x, y] = new PuzzleTile(new Bitmap(puzzle.tileSize, puzzle.tileSize), 0);
+            }*/
             foreach (AdvancedTile tile in tiles)
             {
                 /*if (tile.state == TileState.Open)
@@ -350,8 +350,15 @@ namespace ImageRestorer
                     Console.WriteLine("ERROR: {0}", tile.index);
                     continue;
                 }*/
-                puzzle.tiles[tile.x - minX, tile.y - minY] = tile;
+                if (tile.x != int.MaxValue)
+                    puzzle.tiles[tile.x - minX, tile.y - minY] = tile;
             }
+            /*
+            if (used.Count < puzzle.tileSize * puzzle.tileSize)
+            {
+                puzzle.Save("bug.png");
+                throw new Exception("BUG");
+            }*/
         }
         //
         public static void VHSolve(Puzzle puzzle)

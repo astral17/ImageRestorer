@@ -69,7 +69,7 @@ namespace ImageRestorer
             tiles[x1, y1] = tiles[x2, y2];
             tiles[x2, y2] = tile;
         }
-        public void Save(string fileName)
+        public void Save(string path)
         {
             using (Graphics graphics = Graphics.FromImage(bitmap))
             {
@@ -81,15 +81,77 @@ namespace ImageRestorer
                     }
                 }
             }
-            bitmap.Save(fileName);
+            bitmap.Save(path);
         }
-        public string GetPermutation()
+        public void SetPermutation(int[] permutation)
+        {
+            PuzzleTile[] tilesArray = new PuzzleTile[height * width];
+            
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    tilesArray[tiles[x, y].index] = tiles[x, y];
+                }
+            }
+
+            int index = 0;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    tiles[x, y] = tilesArray[permutation[index++]];
+                }
+            }
+        }
+        public void SetPermutation(string fileName)
+        {
+            int[] permutation = null;
+            using (StreamReader reader = new StreamReader(fileName))
+            {
+                string[] raws = reader.ReadLine().Trim().Split(' ');
+                permutation = new int[raws.Length];
+                for (int i = 0; i < raws.Length; i++)
+                    permutation[i] = int.Parse(raws[i]);
+            }
+            SetPermutation(permutation);
+        }
+        public string GetPermutationString()
         {
             StringBuilder builder = new StringBuilder();
             for (int i = 0; i < height; i++)
                 for (int j = 0; j < width; j++)
                     builder.AppendFormat("{0} ", tiles[j, i].index);
             return builder.ToString();
+        }
+        public int[] GetPermutation()
+        {
+            List<int> permutation = new List<int>(width * height);
+            for (int i = 0; i < height; i++)
+                for (int j = 0; j < width; j++)
+                    permutation.Add(tiles[j, i].index);
+            return permutation.ToArray();
+        }
+        public Int64 GetTotalScore()
+        {
+            Int64 score = 0;
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    if (x > 0)
+                    {
+                        for (int i = 0; i < tileSize; i++)
+                            score += Utils.GetColorDistance(tiles[x - 1, y].bitmap.GetPixel(tileSize - 1, i), tiles[x, y].bitmap.GetPixel(0, i));
+                    }
+                    if (y > 0)
+                    {
+                        for (int i = 0; i < tileSize; i++)
+                            score += Utils.GetColorDistance(tiles[x, y - 1].bitmap.GetPixel(i, tileSize - 1), tiles[x, y].bitmap.GetPixel(i, 0));
+                    }
+                }
+            }
+            return score;
         }
     }
 }
