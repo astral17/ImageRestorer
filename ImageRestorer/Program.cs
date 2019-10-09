@@ -25,7 +25,7 @@ namespace ImageRestorer
             bool skip = true;
 
             StreamWriter writer = new StreamWriter(String.Format("result_thread_{0}.txt", from));
-            foreach (string file in Directory.GetFiles(String.Format("D:\\tasks\\shuffled-images-data\\data_test1_blank\\{0}", tileSize.ToString())))
+            foreach (string file in Directory.GetFiles(String.Format("D:\\tasks\\shuffled-images-data\\data_test2_blank\\{0}", tileSize.ToString())))
             {
                 if (skip && Path.GetFileNameWithoutExtension(file) == from)
                     skip = false;
@@ -37,6 +37,8 @@ namespace ImageRestorer
                 Puzzle puzzle = new Puzzle(file, tileSize);
                 //Solver.LinesSolve(puzzle);
                 Solver.BFSSolve(puzzle);
+                //Solver.NaiveSolve(puzzle);
+                //Solver.VHSolve(puzzle);
                 writer.WriteLine(Path.GetFileName(file));
                 writer.WriteLine(puzzle.GetPermutationString());
             }
@@ -46,7 +48,7 @@ namespace ImageRestorer
         {
             /*
             DateTime stime = DateTime.Now;
-            Puzzle puzzl2e = new Puzzle("0600.png", 32);
+            Puzzle puzzl2e = new Puzzle("3418.png", 64);
             //puzzl2e.Swap(3, 4, 0, 0);
             //Console.WriteLine(puzzl2e.tiles[0, 0].index);
             /*
@@ -62,7 +64,8 @@ namespace ImageRestorer
             puzzl2e.Save("tmp/resultVH.png");
             Solver.LinesSolve(puzzl2e);
             Console.WriteLine("LIN: {0}", puzzl2e.GetTotalScore());
-            puzzl2e.Save("tmp/resultLI.png");*/
+            puzzl2e.Save("tmp/resultLI.png");//*/
+            //return;
             //puzzl2e.Save("result.png");
             /*
             Solver.BFSSolve(puzzl2e);
@@ -79,40 +82,68 @@ namespace ImageRestorer
             sw2.Close();
             return;//*/
 
+            if (false)
+            {
+                const int tileSize = 32;
+                const string solutionPath = "resultB3_mix.txt";
+                //const string imagesPath = "D:\\tasks\\shuffled-images-data\\data_test2_blank\\32";
+                using (StreamReader reader = new StreamReader(solutionPath))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        string file = reader.ReadLine();
+                        int[] permutation = reader.ReadLine().Trim().Split(' ').Select(x => int.Parse(x)).OrderBy(x => x).ToArray();
+                        for (int i = 1; i < permutation.Length; i++)
+                            if (permutation[i - 1] == permutation[i])
+                            {
+                                Console.WriteLine("BUG in {0}: {1}", file, permutation[i].ToString());
+                            }
+                    }
+                }
+                Console.WriteLine("Finish");
+                Thread.Sleep(int.MaxValue);
+                return;
+            }
+
             if (true)
             {
-                //string[] files = { "resultA2.txt", "resultA2_gray.txt", "resultA2_lines.txt", "resultTMP.txt", "resultA2_good.txt" };
+                //string[] files = { "resultA2.txt", "resultA2_gray.txt", "resultA2_lines.txt", "resultTMP.txt", "resultA2_good.txt", "resultA2_max.txt" };
                 //string[] files = { "resultA2_mix_2.txt", "resultA2_mix_n.txt" };
                 //string[] files = { "resultC2.txt", "resultC2_lines2.txt", "resultC2_tmp.txt", "resultC2_bfs.txt" };
                 //string[] files = { "resultC2_bfs.txt", "resultC2.txt", "resultC2_lines2.txt", "resultC2_tmp.txt", "resultC2_bfs_2.txt" };
                 //string[] files = { "resultC2_mix_1e.txt", "resultC2_mix_se.txt" };
                 //string[] files = { "resultC2_mix_se.txt", "resultC2_mix_1e.txt" };
-                string[] files = { "resultB2.txt", "resultB2_1.txt" };
+                //string[] files = { "resultB2.txt", "resultB2_1.txt" };
+                //string[] files = { "resultA2_max.txt", "resultA2_mix.txt" };
+                //string[] files = { "resultA3.txt", "resultA3_bfsmm.txt", "resultA3_lines.txt" };
+                //string[] files = { "resultB3.txt", "resultB3_bfs.txt", "resultB3_bfsmm.txt", "resultB3_lines.txt" };
+                string[] files = { "resultC3_bfs.txt", "resultC3_bfsmm.txt" };
+                //string[] files = { "resultC2_mix_1e.txt" };
                 SolutionMixer mixer = new SolutionMixer();
                 foreach (string file in files)
                 {
-                    mixer.AddAllFrom("D:\\tasks\\shuffled-images-data\\data_test1_blank\\32", 32, file);
+                    mixer.AddAllFrom("D:\\tasks\\shuffled-images-data\\data_test2_blank\\16", 16, file);
                     Console.WriteLine(mixer.GetTotalScore());
                 }
-                mixer.Save("resultB2_mix.txt");
+                mixer.Save("resultC3_mix.txt");
                 //mixer.Save("resultC2_mix.txt");
-                //mixer.Debug("D:\\tasks\\shuffled-images-data\\data_test1_blank\\64", 16);
+                //mixer.Debug("D:\\tasks\\shuffled-images-data\\data_test1_blank\\16", 16);
                 Console.WriteLine("Finish");
                 Thread.Sleep(int.MaxValue);
                 return;
             }
             if (false)
             {
-                StreamWriter writer = new StreamWriter("resultA2_good.txt");
-                Directory.CreateDirectory("good64");
-                foreach (string file in Directory.GetFiles("D:\\tasks\\shuffled-images-data\\data_test1_blank\\64"))
+                StreamWriter writer = new StreamWriter("resultC2_mix_1e.txt");
+                Directory.CreateDirectory("resultC2");
+                foreach (string file in Directory.GetFiles("D:\\tasks\\shuffled-images-data\\data_test1_blank\\16"))
                 {
                     Console.WriteLine(file);
-                    Puzzle puzzle = new Puzzle(file, 64);
+                    Puzzle puzzle = new Puzzle(file, 16);
                     Solver.BFSSolve(puzzle);
                     writer.WriteLine(Path.GetFileName(file));
                     writer.WriteLine(puzzle.GetPermutationString());
-                    puzzle.Save(String.Format("good64/{0}", Path.GetFileName(file)));
+                    puzzle.Save(String.Format("resultC2/{0}", Path.GetFileName(file)));
                 }
                 writer.Close();
                 return;
@@ -161,6 +192,9 @@ namespace ImageRestorer
                 Directory.CreateDirectory("results64VH");*/
                 //Directory.CreateDirectory("results64LI");
 
+                const int tileSize = 16;
+                const int from = 2700, to = from + 300, cnt = 100;
+
                 Thread[] threads =
                 {
                     new Thread(SolveFromTo),
@@ -170,47 +204,51 @@ namespace ImageRestorer
 
                 threads[0].Start(new SolveFromToData
                 {
-                    tileSize = 32,
-                    from = "2100",
-                    to = "2200",
+                    tileSize = tileSize,
+                    from = from.ToString().PadLeft(4, '0'),
+                    to = (from + cnt).ToString().PadLeft(4, '0'),
                 });
                 threads[1].Start(new SolveFromToData
                 {
-                    tileSize = 32,
-                    from = "2200",
-                    to = "2300",
+                    tileSize = tileSize,
+                    from = (from + cnt).ToString().PadLeft(4, '0'),
+                    to = (from + 2 * cnt).ToString().PadLeft(4, '0'),
                 });
                 threads[2].Start(new SolveFromToData
                 {
-                    tileSize = 32,
-                    from = "2300",
-                    to = "2400",
+                    tileSize = tileSize,
+                    from = (from + 2 * cnt).ToString().PadLeft(4, '0'),
+                    to = (from + 3 * cnt).ToString().PadLeft(4, '0'),
                 });
 
                 /*
                 threads[0].Start(new SolveFromToData
                 {
-                    tileSize = 16,
+                    tileSize = tileSize,
                     from = "1800",
                     to = "1900",
                 });
                 threads[1].Start(new SolveFromToData
                 {
-                    tileSize = 16,
+                    tileSize = tileSize,
                     from = "1900",
                     to = "2000",
                 });
                 threads[2].Start(new SolveFromToData
                 {
-                    tileSize = 16,
+                    tileSize = tileSize,
                     from = "2000",
                     to = "2100",
                 });//*/
-
+                StringBuilder stringBuilder = new StringBuilder();
+                int current = from;
                 foreach (Thread thread in threads)
                 {
                     thread.Join();
+                    stringBuilder.Append(File.ReadAllText(String.Format("result_thread_{0}.txt", current.ToString().PadLeft(4, '0'))));
+                    current += cnt;
                 }
+                File.WriteAllText("result_thread.txt", stringBuilder.ToString());
                 return;
 
                 foreach (string file in Directory.GetFiles("D:\\tasks\\shuffled-images-data\\data_test1_blank\\16"))

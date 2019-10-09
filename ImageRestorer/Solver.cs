@@ -278,8 +278,9 @@ namespace ImageRestorer
             tiles[0].x = tiles[0].y = 0;
             int uindex = 0;
             AddEdges(edges, tiles, tiles[0], ref uindex);
-            //Directory.CreateDirectory("results3");
-            //int iteration = 0;
+            /*/
+            Directory.CreateDirectory("results3418");
+            int iteration = 0;//*/
             HashSet<Point> used = new HashSet<Point>();
             used.Add(new Point(0, 0));
             while (edges.Count > 0)
@@ -331,10 +332,10 @@ namespace ImageRestorer
                 Puzzle debugPuzzle = new Puzzle(puzzle.width, puzzle.height, puzzle.tileSize);
                 foreach (AdvancedTile tile in tiles)
                 {
-                    if (tile.state != TileState.Open)
+                    if (tile.x != int.MaxValue)
                         debugPuzzle.tiles[tile.x - minX, tile.y - minY] = tile;
                 }
-                debugPuzzle.Save(String.Format("results3/{0}.png", ++iteration));//*/
+                debugPuzzle.Save(String.Format("results3418/{0}.png", ++iteration));//*/
             }
             /*
             if (used.Count < puzzle.tileSize * puzzle.tileSize)
@@ -361,6 +362,7 @@ namespace ImageRestorer
             }*/
         }
         //
+        // TODO: Fix bug 3512.png
         public static void VHSolve(Puzzle puzzle)
         {
             List<PuzzleTile> tiles = new List<PuzzleTile>();
