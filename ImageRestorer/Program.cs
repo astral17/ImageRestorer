@@ -36,8 +36,8 @@ namespace ImageRestorer
                 Console.WriteLine(file);
                 Puzzle puzzle = new Puzzle(file, tileSize);
                 //Solver.LinesSolve(puzzle);
-                Solver.BFSSolve(puzzle);
-                //Solver.NaiveSolve(puzzle);
+                //Solver.BFSSolve(puzzle);
+                Solver.NaiveSolve(puzzle);
                 //Solver.VHSolve(puzzle);
                 writer.WriteLine(Path.GetFileName(file));
                 writer.WriteLine(puzzle.GetPermutationString());
@@ -46,12 +46,25 @@ namespace ImageRestorer
         }
         static void Main(string[] args)
         {
+            System.Windows.Forms.Application.Run(new PuzzleEditor("D:\\tasks\\shuffled-images-data\\data_test2_blank\\64\\3308.png", 64));
+            //Console.WriteLine("!!!");
+            //System.Threading.Thread.Sleep(int.MaxValue);
+            return;
+            if (args.Length == 0)
+            {
+                Console.WriteLine("Help:");
+                Console.WriteLine("Solve|0 <ImagePath> <result>");
+                Console.WriteLine("Mix|1 <ImagePath> <result> <files>...");
+                Console.WriteLine("Check|2 <result>");
+                Console.WriteLine("Edit|3 <ImagePath> <result>");
+                return;
+            }
             /*
             DateTime stime = DateTime.Now;
-            Puzzle puzzl2e = new Puzzle("3418.png", 64);
+            Puzzle puzzl2e = new Puzzle("0604.png", 32);
             //puzzl2e.Swap(3, 4, 0, 0);
             //Console.WriteLine(puzzl2e.tiles[0, 0].index);
-            /*
+            //*
             Directory.CreateDirectory("tmp");
             Solver.NaiveSolve(puzzl2e);
             Console.WriteLine("NAI: {0}", puzzl2e.GetTotalScore());
@@ -68,9 +81,9 @@ namespace ImageRestorer
             //return;
             //puzzl2e.Save("result.png");
             /*
-            Solver.BFSSolve(puzzl2e);
+            //Solver.BFSSolve(puzzl2e);
             puzzl2e.Save("result.png");
-            Console.WriteLine("BFS: {0}", puzzl2e.GetTotalScore());
+            //Console.WriteLine("BFS: {0}", puzzl2e.GetTotalScore());
             Console.WriteLine("Elapsed: {0}", (((TimeSpan)(DateTime.Now - stime)).TotalMilliseconds).ToString());
             System.Threading.Thread.Sleep(int.MaxValue);
             return;//*/
@@ -105,7 +118,7 @@ namespace ImageRestorer
                 return;
             }
 
-            if (true)
+            if (false)
             {
                 //string[] files = { "resultA2.txt", "resultA2_gray.txt", "resultA2_lines.txt", "resultTMP.txt", "resultA2_good.txt", "resultA2_max.txt" };
                 //string[] files = { "resultA2_mix_2.txt", "resultA2_mix_n.txt" };
@@ -192,8 +205,8 @@ namespace ImageRestorer
                 Directory.CreateDirectory("results64VH");*/
                 //Directory.CreateDirectory("results64LI");
 
-                const int tileSize = 16;
-                const int from = 2700, to = from + 300, cnt = 100;
+                const int tileSize = 32;
+                const int from = 3000, to = from + 300, cnt = 100;
 
                 Thread[] threads =
                 {
