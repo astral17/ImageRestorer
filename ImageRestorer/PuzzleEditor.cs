@@ -7,13 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace ImageRestorer
 {
     public partial class PuzzleEditor : Form
     {
-        private string path;
+        private string imagesPath, savePath, puzzleName;
         private int tileSize;
+        private SolutionMixer solutions;
         private Bitmap bitmap;
         private PuzzleTile[,] tiles = new PuzzleTile[128, 128];
         private static Rectangle EmptyRectangle = new Rectangle(-1, -1, -1, -1);
@@ -49,6 +51,10 @@ namespace ImageRestorer
                     }
             }
         }
+        private void FullSavePuzzle()
+        {
+            solutions.Save(savePath);
+        }
         private void SavePuzzle()
         {
             Puzzle puzzle = new Puzzle(bitmap.Width / tileSize, bitmap.Height / tileSize, tileSize);
@@ -57,11 +63,9 @@ namespace ImageRestorer
                 for (int x = 0; x < puzzle.width; x++)
                 {
                     puzzle.tiles[x, y] = tiles[x, y];
-                    //tiles[x, y].bitmap.Save(String.Format("tiles/tile{0} {1}.png", x, y));
                 }
             }
-            puzzle.Save("result.png");
-            System.IO.File.WriteAllText("result.txt", puzzle.GetPermutationString());
+            solutions.Add(puzzle, puzzleName);
         }
         private Int64 GetScore()
         {
@@ -84,26 +88,65 @@ namespace ImageRestorer
             selected = EmptyRectangle;
             Refresh();
         }
-        public PuzzleEditor(string path, int tileSize)
+        private string ReadNewPuzzleName()
         {
-            InitializeComponent();
-            DoubleBuffered = true;
-            this.path = path;
-            this.tileSize = tileSize;
-
-            bitmap = new Bitmap(Image.FromFile(path));
-            //positions = new int[width, height];
-            //Directory.CreateDirectory("tiles");
+            string puzzleName;
+            bool first = true;
+            do
+            {
+                if (!first)
+                {
+                    Console.WriteLine("Incorrect File");
+                }
+                first = false;
+                Console.Write("Enter the Puzzle Name: ");
+                puzzleName = Console.ReadLine();
+            } while (!File.Exists(Path.Combine(imagesPath, puzzleName)));
+            return puzzleName;
+        }
+        private void LoadFromImage(string puzzleName)
+        {
+            bitmap = new Bitmap(Image.FromFile(Path.Combine(imagesPath, puzzleName)));
             int index = 0;
             for (int y = 0; y < bitmap.Height / tileSize; y++)
             {
                 for (int x = 0; x < bitmap.Width / tileSize; x++)
                 {
-                    //positions[x, y] = index++;
                     tiles[x, y] = new PuzzleTile(bitmap.Clone(new Rectangle(x * tileSize, y * tileSize, tileSize, tileSize), System.Drawing.Imaging.PixelFormat.DontCare), index++);
-                    //tiles[x, y].bitmap.Save(String.Format("tiles/tile{0} {1}.png", x, y));
                 }
             }
+        }
+        private void LoadPuzzle(string puzzleName)
+        {
+            this.puzzleName = puzzleName;
+            if (solutions.Contains(puzzleName))
+            {
+                bitmap = new Bitmap(Image.FromFile(Path.Combine(imagesPath, puzzleName)));
+                Puzzle puzzle = new Puzzle(Path.Combine(imagesPath, puzzleName), tileSize);
+                puzzle.SetPermutation(solutions.Get(puzzleName));
+                tiles = new PuzzleTile[128, 128];
+                for (int y = 0; y < puzzle.height; y++)
+                {
+                    for (int x = 0; x < puzzle.width; x++)
+                    {
+                        tiles[x, y] = puzzle.tiles[x, y];
+                    }
+                }
+            }
+            else
+                LoadFromImage(puzzleName);
+        }
+        public PuzzleEditor(string imagesPath, int tileSize, string savePath, string puzzleName = null)
+        {
+            InitializeComponent();
+            DoubleBuffered = true;
+            this.imagesPath = imagesPath;
+            this.tileSize = tileSize;
+            this.savePath = savePath;
+            solutions = new SolutionMixer(imagesPath, tileSize, savePath);
+            if (String.IsNullOrEmpty(puzzleName))
+                puzzleName = ReadNewPuzzleName();
+            LoadPuzzle(puzzleName);
         }
         private void PuzzleEditor_Paint(object sender, PaintEventArgs e)
         {
@@ -196,10 +239,17 @@ namespace ImageRestorer
                     isMoving = true;
                     break;
                 case Keys.S:
-                    SavePuzzle();
+                    if (e.Control)
+                        FullSavePuzzle();
+                    else
+                        SavePuzzle();
                     break;
                 case Keys.D:
                     Console.WriteLine("score: {0}", GetScore());
+                    break;
+                case Keys.O:
+                    LoadPuzzle(ReadNewPuzzleName());
+                    Refresh();
                     break;
                 case Keys.D1:
                     SolveSelected();

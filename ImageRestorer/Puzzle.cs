@@ -23,9 +23,8 @@ namespace ImageRestorer
     public class Puzzle
     {
         public int tileSize, width, height;
-        private Bitmap bitmap;
+        private readonly Bitmap bitmap;
         public PuzzleTile[,] tiles;
-        //public int[,] positions;
         public Puzzle(int width, int height, int tileSize)
         {
             this.width = width;
@@ -131,6 +130,19 @@ namespace ImageRestorer
                 for (int j = 0; j < width; j++)
                     permutation.Add(tiles[j, i].index);
             return permutation.ToArray();
+        }
+        public Int64 GetTileScore(int x, int y)
+        {
+            Int64 score = 0;
+            if (x > 0)
+                score += Utils.GetScoreBetween(Utils.ConnectDirection.Right, tiles[x - 1, y].bitmap, tiles[x, y].bitmap);
+            if (x + 1 < width)
+                score += Utils.GetScoreBetween(Utils.ConnectDirection.Right, tiles[x, y].bitmap, tiles[x + 1, y].bitmap);
+            if (y > 0)
+                score += Utils.GetScoreBetween(Utils.ConnectDirection.Bottom, tiles[x, y - 1].bitmap, tiles[x, y].bitmap);
+            if (y + 1 < height)
+                score += Utils.GetScoreBetween(Utils.ConnectDirection.Bottom, tiles[x, y].bitmap, tiles[x, y + 1].bitmap);
+            return score;
         }
         public Int64 GetTotalScore()
         {

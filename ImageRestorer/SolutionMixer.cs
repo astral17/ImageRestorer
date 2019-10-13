@@ -24,8 +24,12 @@ namespace ImageRestorer
         {
             AddAllFrom(imagesPath, tileSize, solutionPath);
         }
+        public bool Contains(string puzzleName) => solutions.ContainsKey(puzzleName);
+        public int[] Get(string puzzleName) => solutions[puzzleName].permutation.ToArray();
         public void AddAllFrom(string imagesPath, int tileSize, string solutionPath)
         {
+            if (!File.Exists(solutionPath))
+                return;
             using (StreamReader reader = new StreamReader(solutionPath))
             {
                 while (!reader.EndOfStream)

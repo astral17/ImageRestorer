@@ -44,21 +44,71 @@ namespace ImageRestorer
             }
             writer.Close();
         }
+        /*
+        static void RunSolver(string imagePath, string savePath)
+        {
+
+        }
+        static void RunMixer(string imagesPath, string savePath, string[] files)
+        {
+
+        }
+        static void RunChecker(string path)
+        {
+
+        }
+        static void RunEditor(string imagesPath, int tileSize, string savePath, string puzzleName = null)
+        {
+            System.Windows.Forms.Application.Run(new PuzzleEditor(imagesPath, tileSize, savePath, puzzleName));
+        }
+        interface IArgumentsHandler
+        {
+            string GetHelp();
+            void Handle(string[] args);
+        }//*/
         static void Main(string[] args)
         {
-            System.Windows.Forms.Application.Run(new PuzzleEditor("D:\\tasks\\shuffled-images-data\\data_test2_blank\\64\\3308.png", 64));
             //Console.WriteLine("!!!");
             //System.Threading.Thread.Sleep(int.MaxValue);
-            return;
-            if (args.Length == 0)
+            /*
+            System.Windows.Forms.Application.Run(new PuzzleEditor("D:\\tasks\\shuffled-images-data\\data_test2_blank\\32\\", 32, "resultB3_editor.txt"));
+            return;//*/
+            /*
+            {
+                Puzzle puzzl2e = new Puzzle("2517.png", 64);
+                Solver.BFSSolve(puzzl2e);
+                Solver.AnnealingSolve(puzzl2e);
+                System.Threading.Thread.Sleep(int.MaxValue);
+            }
+            return;//*/
+            /*
+            if (false && args.Length == 0)
             {
                 Console.WriteLine("Help:");
-                Console.WriteLine("Solve|0 <ImagePath> <result>");
-                Console.WriteLine("Mix|1 <ImagePath> <result> <files>...");
+                Console.WriteLine("Solve|0 <ImagePath> <savePath>");
+                Console.WriteLine("Mix|1 <ImagesPath> <result> <files>...");
                 Console.WriteLine("Check|2 <result>");
-                Console.WriteLine("Edit|3 <ImagePath> <result>");
+                Console.WriteLine("Edit|3 <ImagesPath> <tileSize> <result> [puzzleName]");
                 return;
             }
+            switch (args[0].ToLower())
+            {
+                case "solve":
+                    RunSolver(args[1], args[2]);
+                    break;
+                case "mix":
+                    RunMixer(args[1], args[2], args.Skip(2).ToArray());
+                    break;
+                case "check":
+                    RunChecker(args[1]);
+                    break;
+                case "edit":
+                    RunEditor(args[1], int.Parse(args[2]), args[3], args.Length > 2 ? args[3] : "");
+                    break;
+                default:
+                    Console.WriteLine("Unknown 1 argument: {0}", args[0]);
+                    break;
+            }//*/
             /*
             DateTime stime = DateTime.Now;
             Puzzle puzzl2e = new Puzzle("0604.png", 32);
@@ -97,8 +147,8 @@ namespace ImageRestorer
 
             if (false)
             {
-                const int tileSize = 32;
-                const string solutionPath = "resultB3_mix.txt";
+                const int tileSize = 64;
+                const string solutionPath = "resultA3_editor.txt";
                 //const string imagesPath = "D:\\tasks\\shuffled-images-data\\data_test2_blank\\32";
                 using (StreamReader reader = new StreamReader(solutionPath))
                 {
@@ -118,7 +168,7 @@ namespace ImageRestorer
                 return;
             }
 
-            if (false)
+            if (true)
             {
                 //string[] files = { "resultA2.txt", "resultA2_gray.txt", "resultA2_lines.txt", "resultTMP.txt", "resultA2_good.txt", "resultA2_max.txt" };
                 //string[] files = { "resultA2_mix_2.txt", "resultA2_mix_n.txt" };
@@ -130,17 +180,18 @@ namespace ImageRestorer
                 //string[] files = { "resultA2_max.txt", "resultA2_mix.txt" };
                 //string[] files = { "resultA3.txt", "resultA3_bfsmm.txt", "resultA3_lines.txt" };
                 //string[] files = { "resultB3.txt", "resultB3_bfs.txt", "resultB3_bfsmm.txt", "resultB3_lines.txt" };
-                string[] files = { "resultC3_bfs.txt", "resultC3_bfsmm.txt" };
+                //string[] files = { "resultC3_bfs.txt", "resultC3_bfsmm.txt" };
+                string[] files = { "resultA3_editor.txt", "resultA3_last.txt" };
                 //string[] files = { "resultC2_mix_1e.txt" };
                 SolutionMixer mixer = new SolutionMixer();
                 foreach (string file in files)
                 {
-                    mixer.AddAllFrom("D:\\tasks\\shuffled-images-data\\data_test2_blank\\16", 16, file);
+                    mixer.AddAllFrom("D:\\tasks\\shuffled-images-data\\data_test2_blank\\64", 64, file);
                     Console.WriteLine(mixer.GetTotalScore());
                 }
-                mixer.Save("resultC3_mix.txt");
+                //mixer.Save("resultC3_mix.txt");
                 //mixer.Save("resultC2_mix.txt");
-                //mixer.Debug("D:\\tasks\\shuffled-images-data\\data_test1_blank\\16", 16);
+                //mixer.Debug("D:\\tasks\\shuffled-images-data\\data_test2_blank\\64", 64);
                 Console.WriteLine("Finish");
                 Thread.Sleep(int.MaxValue);
                 return;

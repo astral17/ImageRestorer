@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.IO;
+using static ImageRestorer.Utils;
 
 namespace ImageRestorer
 {
@@ -105,38 +106,6 @@ namespace ImageRestorer
         }
 
         //
-        private enum ConnectDirection
-        {
-            Left = 0,
-            Right = 1,
-            Top = 2,
-            Bottom = 3,
-        }
-        private static Int64 GetScoreBetween(ConnectDirection direction, Bitmap tile1, Bitmap tile2)
-        {
-            Int64 score = 0;
-            int size = tile1.Width;
-            switch (direction)
-            {
-                case ConnectDirection.Right:
-                    for (int i = 0; i < size; i++)
-                        score += Utils.GetColorDistance(tile1.GetPixel(size - 1, i), tile2.GetPixel(0, i));
-                    break;
-                case ConnectDirection.Left:
-                    for (int i = 0; i < size; i++)
-                        score += Utils.GetColorDistance(tile1.GetPixel(0, i), tile2.GetPixel(size - 1, i));
-                    break;
-                case ConnectDirection.Bottom:
-                    for (int i = 0; i < size; i++)
-                        score += Utils.GetColorDistance(tile1.GetPixel(i, size - 1), tile2.GetPixel(i, 0));
-                    break;
-                case ConnectDirection.Top:
-                    for (int i = 0; i < size; i++)
-                        score += Utils.GetColorDistance(tile1.GetPixel(i, 0), tile2.GetPixel(i, size - 1));
-                    break;
-            }
-            return score;
-        }
         private class TwoTilesEdge : IComparable
         {
             public ConnectDirection direction;
@@ -363,6 +332,7 @@ namespace ImageRestorer
         }
         //
         // TODO: Fix bug 3512.png
+        [Obsolete("Contains unknown bug")]
         public static void VHSolve(Puzzle puzzle)
         {
             List<PuzzleTile> tiles = new List<PuzzleTile>();
@@ -781,6 +751,66 @@ namespace ImageRestorer
                 indexY++;
             }
 
+        }
+        public static void AnnealingSolve(Puzzle puzzle)
+        {
+            int index = 0;
+            Int64 score = puzzle.GetTotalScore();
+            Int64 bestScore = score;
+            Directory.CreateDirectory("ann");
+            Random random = new Random((int)DateTime.Now.Ticks);
+            for (double t = 0.10; t > 0.001; t *= 0.9995)
+            {
+
+                double rnd = random.NextDouble();
+                int w, h, x1, y1, x2, y2;
+                //int x1 = random.Next(0, puzzle.width), y1 = random.Next(0, puzzle.height);
+                //int x2 = random.Next(0, puzzle.width), y2 = random.Next(0, puzzle.height);
+                do
+                {
+                    w = random.Next(1, puzzle.width / 2);
+                    h = random.Next(1, puzzle.height / 4);
+
+                    x1 = random.Next(0, puzzle.width - w + 1);
+                    y1 = random.Next(0, puzzle.height - h + 1);
+                    x2 = random.Next(0, puzzle.width - w + 1);
+                    y2 = random.Next(0, puzzle.height - h + 1);
+                } while (new Rectangle(x1, y1, w, h).IntersectsWith(new Rectangle(x2, y2, w, h)));
+                
+                //Int64 curScore = score;
+                for (int i = 0; i < w; i++)
+                    for (int j = 0; j < h; j++)
+                        puzzle.Swap(x1 + i, y1 + j, x2 + i, y2 + j);
+                
+                Int64 curScore = puzzle.GetTotalScore();
+                //curScore = curScore + puzzle.GetTileScore(x1, y1) + puzzle.GetTileScore(x2, y2);
+                //Int64 pscore = puzzle.GetTotalScore();
+                /*if (curScore != puzzle.GetTotalScore())
+                {
+                    Console.WriteLine("!!!");
+                    return;
+                }*/
+                if (curScore > score && random.NextDouble() > t)
+                {
+                    for (int i = 0; i < w; i++)
+                        for (int j = 0; j < h; j++)
+                            puzzle.Swap(x1 + i, y1 + j, x2 + i, y2 + j);
+                    continue;
+                }
+                score = curScore;
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    if (index > 100)
+                        puzzle.Save(String.Format("ann/{0}.png", index.ToString().PadLeft(2, '0')));
+                }
+                index++;
+                if (index % 10 == 0)
+                {
+                    Console.WriteLine("{0}: best = {1}; score = {2}", index / 10, bestScore, score);
+                }
+            }
+            Console.WriteLine("best: {0}", bestScore);
         }
     }
 }
